@@ -37,11 +37,14 @@ discriminator model such as RNNs or Transformers.
   (c) predictive_metrics.py
   - Use Post-hoc RNN to predict one-step ahead (last feature)
 
-(2) timegan.py
+(3) timegan.py
 - Use original time-series data as training set to generater synthetic time-series data
 
-(3) main_timegan.py
+(4) main_timegan.py
 - Report discriminative and predictive scores for the dataset and t-SNE and PCA analysis
+
+(5) utils.py
+- Some utility functions for metrics and timeGAN.
 
 ### Command inputs:
 
@@ -60,7 +63,7 @@ Note that network parameters should be optimized for different datasets.
 
 ```shell
 $ python3 main_timegan.py --data_name stock --seq_len 24 --module gru
---hidden_dim 24 --num_layer 3 --iteration 10000 --batch_size 128 
+--hidden_dim 24 --num_layer 3 --iteration 50000 --batch_size 128 
 --metric_iteration 10
 ```
 

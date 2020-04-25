@@ -144,7 +144,7 @@ if __name__ == '__main__':
   parser.add_argument(
       '--iteration',
       help='Training iterations (should be optimized)',
-      default=50000,
+      default=10000,
       type=int)
   parser.add_argument(
       '--batch_size',
@@ -160,4 +160,4 @@ if __name__ == '__main__':
   args = parser.parse_args() 
   
   # Calls main function  
-  generated_data, metrics = main(args)
+  ori_data, generated_data, metrics = main(args)

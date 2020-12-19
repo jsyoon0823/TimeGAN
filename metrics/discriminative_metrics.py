@@ -120,7 +120,7 @@ def discriminative_score_metrics (ori_data, generated_data):
                                                 feed_dict={X: test_x, T: test_t, X_hat: test_x_hat, T_hat: test_t_hat})
     
   y_pred_final = np.squeeze(np.concatenate((y_pred_real_curr, y_pred_fake_curr), axis = 0))
-  y_label_final = np.concatenate((np.ones([len(y_pred_real_curr),]), np.zeros([len(y_pred_real_curr),])), axis = 0)
+  y_label_final = np.concatenate((np.ones([len(y_pred_real_curr),]), np.zeros([len(y_pred_fake_curr),])), axis = 0)
     
   # Compute the accuracy
   acc = accuracy_score(y_label_final, (y_pred_final>0.5))

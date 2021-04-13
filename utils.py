@@ -92,12 +92,13 @@ def rnn_cell(module_name, hidden_dim):
   
   # GRU
   if (module_name == 'gru'):
-    rnn_cell = tf.nn.rnn_cell.GRUCell(num_units=hidden_dim, activation=tf.nn.tanh)
+    rnn_cell = tf.compat.v1.nn.rnn_cell.GRUCell(num_units=hidden_dim, activation=tf.nn.tanh)
   # LSTM
   elif (module_name == 'lstm'):
-    rnn_cell = tf.contrib.rnn.BasicLSTMCell(num_units=hidden_dim, activation=tf.nn.tanh)
+    rnn_cell = tf.compat.v1.nn.rnn_cell.BasicLSTMCell(num_units=hidden_dim, activation=tf.nn.tanh)
   # LSTM Layer Normalization
   elif (module_name == 'lstmLN'):
+    #not implemented
     rnn_cell = tf.contrib.rnn.LayerNormBasicLSTMCell(num_units=hidden_dim, activation=tf.nn.tanh)
   return rnn_cell
 

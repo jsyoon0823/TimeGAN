@@ -74,10 +74,11 @@ def discriminative_score_metrics (ori_data, generated_data):
       - d_vars: discriminator variables
     """
     with tf.compat.v1.variable_scope("discriminator", reuse = tf.compat.v1.AUTO_REUSE) as vs:
-      d_cell = tf.compat.v1.nn.rnn_cell.GRUCell(num_units=hidden_dim, activation=tf.nn.tanh, name = 'd_cell')
-      d_outputs, d_last_states = tf.compat.v1.nn.dynamic_rnn(d_cell, x, dtype=tf.float32, sequence_length = t)
-      y_hat_logit = tf.compat.v1.layers.dense(d_last_states, 1, activation=None) 
-      y_hat = tf.compat.v1.sigmoid(y_hat_logit)
+      d_cell = tf.keras.layers.GRUCell(hidden_dim, activation='tanh', name = 'd_cell')
+      d_rnn = tf.keras.layers.RNN(d_cell,return_sequences=True,return_state=True)
+      d_outputs,d_last_states = d_rnn(x)
+      y_hat_logit = tf.keras.layers.Dense(1, activation=None)(d_last_states)
+      y_hat = tf.nn.sigmoid(y_hat_logit)
       d_vars = [v for v in tf.compat.v1.global_variables() if v.name.startswith(vs.name)]
     
     return y_hat_logit, y_hat, d_vars

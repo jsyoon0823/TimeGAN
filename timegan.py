@@ -18,6 +18,8 @@ Note: Use original data as training set to generater synthetic data (time-series
 
 # Necessary Packages
 import tensorflow as tf
+tf.compat.v1.disable_eager_execution()
+
 import numpy as np
 from utils import extract_time, rnn_cell, random_generator, batch_generator
 
@@ -76,9 +78,6 @@ def timegan (ori_data, parameters):
   z_dim        = dim
   gamma        = 1
     
-
-  tf.compat.v1.disable_eager_execution()
-  
   # Input place holders
   X = tf.compat.v1.placeholder(tf.float32, [None, max_seq_len, dim], name = "myinput_x")
   Z = tf.compat.v1.placeholder(tf.float32, [None, max_seq_len, z_dim], name = "myinput_z")

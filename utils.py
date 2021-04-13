@@ -99,6 +99,7 @@ def rnn_cell(module_name, hidden_dim):
   # LSTM Layer Normalization
   elif (module_name == 'lstmLN'):
     #not implemented
+    #https://github.com/tensorflow/addons/pull/210
     rnn_cell = tf.contrib.rnn.LayerNormBasicLSTMCell(num_units=hidden_dim, activation=tf.nn.tanh)
   return rnn_cell
 

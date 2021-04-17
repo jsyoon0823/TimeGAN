@@ -36,7 +36,7 @@ def discriminative_score_metrics (ori_data, generated_data):
     - discriminative_score: np.abs(classification accuracy - 0.5)
   """
   # Initialization on the Graph
-  tf.reset_default_graph()
+  tf.compat.v1.reset_default_graph()
 
   # Basic Parameters
   no, seq_len, dim = np.asarray(ori_data).shape    
@@ -54,11 +54,11 @@ def discriminative_score_metrics (ori_data, generated_data):
     
   # Input place holders
   # Feature
-  X = tf.placeholder(tf.float32, [None, max_seq_len, dim], name = "myinput_x")
-  X_hat = tf.placeholder(tf.float32, [None, max_seq_len, dim], name = "myinput_x_hat")
+  X = tf.compat.v1.placeholder(tf.float32, [None, max_seq_len, dim], name = "myinput_x")
+  X_hat = tf.compat.v1.placeholder(tf.float32, [None, max_seq_len, dim], name = "myinput_x_hat")
     
-  T = tf.placeholder(tf.int32, [None], name = "myinput_t")
-  T_hat = tf.placeholder(tf.int32, [None], name = "myinput_t_hat")
+  T = tf.compat.v1.placeholder(tf.int32, [None], name = "myinput_t")
+  T_hat = tf.compat.v1.placeholder(tf.int32, [None], name = "myinput_t_hat")
     
   # discriminator function
   def discriminator (x, t):
@@ -73,12 +73,13 @@ def discriminative_score_metrics (ori_data, generated_data):
       - y_hat: discriminator output
       - d_vars: discriminator variables
     """
-    with tf.variable_scope("discriminator", reuse = tf.AUTO_REUSE) as vs:
-      d_cell = tf.nn.rnn_cell.GRUCell(num_units=hidden_dim, activation=tf.nn.tanh, name = 'd_cell')
-      d_outputs, d_last_states = tf.nn.dynamic_rnn(d_cell, x, dtype=tf.float32, sequence_length = t)
-      y_hat_logit = tf.contrib.layers.fully_connected(d_last_states, 1, activation_fn=None) 
+    with tf.compat.v1.variable_scope("discriminator", reuse = tf.compat.v1.AUTO_REUSE) as vs:
+      d_cell = tf.keras.layers.GRUCell(hidden_dim, activation='tanh', name = 'd_cell')
+      d_rnn = tf.keras.layers.RNN(d_cell,return_sequences=True,return_state=True)
+      d_outputs,d_last_states = d_rnn(x)
+      y_hat_logit = tf.keras.layers.Dense(1, activation=None)(d_last_states)
       y_hat = tf.nn.sigmoid(y_hat_logit)
-      d_vars = [v for v in tf.all_variables() if v.name.startswith(vs.name)]
+      d_vars = [v for v in tf.compat.v1.global_variables() if v.name.startswith(vs.name)]
     
     return y_hat_logit, y_hat, d_vars
     
@@ -93,12 +94,12 @@ def discriminative_score_metrics (ori_data, generated_data):
   d_loss = d_loss_real + d_loss_fake
     
   # optimizer
-  d_solver = tf.train.AdamOptimizer().minimize(d_loss, var_list = d_vars)
+  d_solver = tf.compat.v1.train.AdamOptimizer().minimize(d_loss, var_list = d_vars)
         
   ## Train the discriminator   
   # Start session and initialize
-  sess = tf.Session()
-  sess.run(tf.global_variables_initializer())
+  sess = tf.compat.v1.Session()
+  sess.run(tf.compat.v1.global_variables_initializer())
     
   # Train/test division for both original and generated data
   train_x, train_x_hat, test_x, test_x_hat, train_t, train_t_hat, test_t, test_t_hat = \

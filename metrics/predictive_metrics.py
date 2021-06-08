@@ -34,7 +34,7 @@ def predictive_score_metrics (ori_data, generated_data):
     - predictive_score: MAE of the predictions on the original data
   """
   # Initialization on the Graph
-  tf.compat.v1.reset_default_graph()
+  tf.reset_default_graph()
 
   # Basic Parameters
   no, seq_len, dim = np.asarray(ori_data).shape
@@ -51,9 +51,9 @@ def predictive_score_metrics (ori_data, generated_data):
   batch_size = 128
     
   # Input place holders
-  X = tf.compat.v1.placeholder(tf.float32, [None, max_seq_len-1, dim-1], name = "myinput_x")
-  T = tf.compat.v1.placeholder(tf.int32, [None], name = "myinput_t")    
-  Y = tf.compat.v1.placeholder(tf.float32, [None, max_seq_len-1, 1], name = "myinput_y")
+  X = tf.placeholder(tf.float32, [None, max_seq_len-1, dim-1], name = "myinput_x")
+  T = tf.placeholder(tf.int32, [None], name = "myinput_t")    
+  Y = tf.placeholder(tf.float32, [None, max_seq_len-1, 1], name = "myinput_y")
     
   # Predictor function
   def predictor (x, t):
@@ -67,25 +67,25 @@ def predictive_score_metrics (ori_data, generated_data):
       - y_hat: prediction
       - p_vars: predictor variables
     """
-    with tf.compat.v1.variable_scope("predictor", reuse = tf.compat.v1.AUTO_REUSE) as vs:
-      p_cell = tf.keras.layers.GRUCell(hidden_dim, activation='tanh', name = 'p_cell')
-      p_outputs= tf.keras.layers.RNN(p_cell,return_sequences=True)(x)
-      y_hat_logit = tf.keras.layers.Dense(1,activation=None)(p_outputs)
+    with tf.variable_scope("predictor", reuse = tf.AUTO_REUSE) as vs:
+      p_cell = tf.nn.rnn_cell.GRUCell(num_units=hidden_dim, activation=tf.nn.tanh, name = 'p_cell')
+      p_outputs, p_last_states = tf.nn.dynamic_rnn(p_cell, x, dtype=tf.float32, sequence_length = t)
+      y_hat_logit = tf.contrib.layers.fully_connected(p_outputs, 1, activation_fn=None) 
       y_hat = tf.nn.sigmoid(y_hat_logit)
-      p_vars = [v for v in tf.compat.v1.global_variables() if v.name.startswith(vs.name)]
+      p_vars = [v for v in tf.all_variables() if v.name.startswith(vs.name)]
     
     return y_hat, p_vars
     
   y_pred, p_vars = predictor(X, T)
   # Loss for the predictor
-  p_loss = tf.compat.v1.losses.absolute_difference(Y, y_pred)
+  p_loss = tf.losses.absolute_difference(Y, y_pred)
   # optimizer
-  p_solver = tf.compat.v1.train.AdamOptimizer().minimize(p_loss, var_list = p_vars)
+  p_solver = tf.train.AdamOptimizer().minimize(p_loss, var_list = p_vars)
         
   ## Training    
   # Session start
-  sess = tf.compat.v1.Session()
-  sess.run(tf.compat.v1.global_variables_initializer())
+  sess = tf.Session()
+  sess.run(tf.global_variables_initializer())
     
   # Training using Synthetic dataset
   for itt in range(iterations):

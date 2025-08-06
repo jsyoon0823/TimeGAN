@@ -25,7 +25,7 @@ main_timegan.py
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-
+import pandas as pd 
 import argparse
 import numpy as np
 import warnings
@@ -40,38 +40,24 @@ from metrics.discriminative_metrics import discriminative_score_metrics
 from metrics.predictive_metrics import predictive_score_metrics
 from metrics.visualization_metrics import visualization
 
-
 def main (args):
-  """Main function for timeGAN experiments.
+  """Main function for timeGAN experiments."""
   
-  Args:
-    - data_name: sine, stock, or energy
-    - seq_len: sequence length
-    - Network parameters (should be optimized for different datasets)
-      - module: gru, lstm, or lstmLN
-      - hidden_dim: hidden dimensions
-      - num_layer: number of layers
-      - iteration: number of training iterations
-      - batch_size: the number of samples in each batch
-    - metric_iteration: number of iterations for metric computation
-  
-  Returns:
-    - ori_data: original data
-    - generated_data: generated synthetic data
-    - metric_results: discriminative and predictive scores
-  """
   ## Data loading
-  if args.data_name in ['stock', 'energy']:
-    ori_data = real_data_loading(args.data_name, args.seq_len)
-  elif args.data_name == 'sine':
+  
+  # We simplify the logic to handle 'sine' or any other real data name.
+  if args.data_name == 'sine':
     # Set number of samples and its dimensions
     no, dim = 10000, 5
     ori_data = sine_data_generation(no, args.seq_len, dim)
-    
+  else: # This will now correctly handle 'Beirut', 'Tripoli', etc.
+    ori_data = real_data_loading(args.data_name, args.seq_len)
+
+      
   print(args.data_name + ' dataset is ready.')
     
   ## Synthetic data generation by TimeGAN
-  # Set newtork parameters
+  # Set network parameters
   parameters = dict()  
   parameters['module'] = args.module
   parameters['hidden_dim'] = args.hidden_dim
@@ -109,22 +95,32 @@ def main (args):
   ## Print discriminative and predictive scores
   print(metric_results)
 
-  return ori_data, generated_data, metric_results
+  # Reshape and save the data
+  stacked_data = np.asarray(generated_data)
+  num_samples, seq_len, num_features = stacked_data.shape
+  reshaped_data = stacked_data.reshape(num_samples * seq_len, num_features)
 
+  pd.DataFrame(reshaped_data).to_csv('{city}_synthetic_data.csv', index=False)
+  print("Synthetic data saved to {city}_synthetic_data.csv")
+
+  return ori_data, generated_data, metric_results
 
 if __name__ == '__main__':  
   
   # Inputs for the main function
   parser = argparse.ArgumentParser()
+  
+ 
   parser.add_argument(
       '--data_name',
-      choices=['sine','stock','energy'],
-      default='stock',
+      default='Tripoli', # Set a default city for easy testing
       type=str)
+  
+  
   parser.add_argument(
       '--seq_len',
       help='sequence length',
-      default=24,
+      default=24, # A good starting point for optimization
       type=int)
   parser.add_argument(
       '--module',
@@ -144,12 +140,12 @@ if __name__ == '__main__':
   parser.add_argument(
       '--iteration',
       help='Training iterations (should be optimized)',
-      default=50000,
+      default=5000, # A good number for initial quality tests
       type=int)
   parser.add_argument(
       '--batch_size',
       help='the number of samples in mini-batch (should be optimized)',
-      default=128,
+      default=128, # Try a different batch size
       type=int)
   parser.add_argument(
       '--metric_iteration',
@@ -158,6 +154,4 @@ if __name__ == '__main__':
       type=int)
   
   args = parser.parse_args() 
-  
-  # Calls main function  
   ori_data, generated_data, metrics = main(args)

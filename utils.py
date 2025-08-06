@@ -18,8 +18,10 @@ utils.py
 (3) rnn_cell: Basic RNN Cell.
 (4) random_generator: random vector generator
 (5) batch_generator: mini-batch generator
-"""
-
+# """
+# # Necessary Packages
+# import tensorflow.compat.v1 as tf
+# tf.disable_v2_behavior() # Add this
 ## Necessary Packages
 import numpy as np
 import tensorflow as tf
@@ -102,26 +104,43 @@ def rnn_cell(module_name, hidden_dim):
   return rnn_cell
 
 
-def random_generator (batch_size, z_dim, T_mb, max_seq_len):
+# def random_generator (batch_size, z_dim, T_mb, max_seq_len):
+#   """Random vector generation.
+  
+#   Args:
+#     - batch_size: size of the random vector
+#     - z_dim: dimension of random vector
+#     - T_mb: time information for the random vector
+#     - max_seq_len: maximum sequence length
+    
+#   Returns:
+#     - Z_mb: generated random vector
+#   """
+#   Z_mb = list()
+#   for i in range(batch_size):
+#     temp = np.zeros([max_seq_len, z_dim])
+#     temp_Z = np.random.uniform(0., 1, [T_mb[i], z_dim])
+#     temp[:T_mb[i],:] = temp_Z
+#     Z_mb.append(temp_Z)
+#   return Z_mb
+
+# In utils.py
+
+def random_generator (batch_size, z_dim, seq_len):
   """Random vector generation.
   
   Args:
     - batch_size: size of the random vector
     - z_dim: dimension of random vector
-    - T_mb: time information for the random vector
-    - max_seq_len: maximum sequence length
+    - seq_len: sequence length of the vector
     
   Returns:
     - Z_mb: generated random vector
   """
-  Z_mb = list()
-  for i in range(batch_size):
-    temp = np.zeros([max_seq_len, z_dim])
-    temp_Z = np.random.uniform(0., 1, [T_mb[i], z_dim])
-    temp[:T_mb[i],:] = temp_Z
-    Z_mb.append(temp_Z)
+  # All our sequences have the same length (seq_len), so we can generate
+  # the noise for the whole batch in one go.
+  Z_mb = np.random.uniform(0., 1, [batch_size, seq_len, z_dim])
   return Z_mb
-
 
 def batch_generator(data, time, batch_size):
   """Mini-batch generator.

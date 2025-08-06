@@ -17,7 +17,9 @@ Note: Use post-hoc RNN to classify original data and synthetic data
 
 Output: discriminative score (np.abs(classification accuracy - 0.5))
 """
-
+# # Necessary Packages
+# import tensorflow.compat.v1 as tf
+# tf.disable_v2_behavior() # Add this
 # Necessary Packages
 import tensorflow as tf
 import numpy as np
